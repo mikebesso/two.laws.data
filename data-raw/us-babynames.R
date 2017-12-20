@@ -11,18 +11,19 @@ all <- dir(PackageData$CacheFolder, "\\.txt$", full.names = TRUE)
 all %<>% sort()
 
 ReadBabyNameFile <- function(path){
-  BabyNames <- readr::read_csv(path, col_names = FALSE, col_types = list(X2 = col_character()))
+  BabyNames <- readr::read_csv(path, col_names = FALSE, col_types = list(X2 = readr::col_character()))
   names(BabyNames) <- c("Name", "Sex", "Count")
   BabyNames$Year = as.numeric(gsub("[^0-9]", "", basename(path)))
 
   BabyNames %<>%
-    tbl_df() %>%
-    select(Year, Sex, Name, Count) %>%
-    arrange(Sex, desc(Count))
+    tibble::as_tibble() %>%
+    dplyr::select(Year, Sex, Name, Count) %>%
+    dplyr::arrange(Sex, desc(Count))
 
   return(BabyNames)
 }
 
-us.babynames <- lapply(all, ReadBabyNameFile)
+us.babynames <- dplyr::bind_rows(lapply(all, ReadBabyNameFile)) %>%
+  df_filter(Count > 10000)
 
 devtools::use_data(us.babynames, compress = "xz", overwrite = T)

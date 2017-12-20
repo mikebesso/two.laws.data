@@ -1,5 +1,5 @@
-# library(two.laws.big.bang)
-# library(two.laws.dev)
+library(two.laws.big.bang)
+library(two.laws.dev)
 
 PackageData <- PackageDataClass$new("us-babynames")
 
@@ -11,13 +11,13 @@ ssa <- PackageData$GetHtmlTable(
 
 ssa$Total <- NULL
 
-ssa$Male <- parse_number(ssa$Male)
-ssa$Female <- parse_number(ssa$Female)
+ssa$Male <- readr::parse_number(ssa$Male)
+ssa$Female <- readr::parse_number(ssa$Female)
 
 us.births <- ssa %>%
-  gather(Sex, Count, Male:Female) %>%
-  arrange(Year, Sex) %>%
-  mutate(Count = as.integer(Count))
+  tidyr::gather(Sex, Count, Male:Female) %>%
+  dplyr::arrange(Year, Sex) %>%
+  dplyr::mutate(Count = as.integer(Count))
 
-write_csv(us.births, "data-raw/us-births.csv")
+rio::export(us.births, "data-raw/us-births.csv")
 devtools::use_data(us.births, overwrite = TRUE)
